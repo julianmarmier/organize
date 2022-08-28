@@ -12,7 +12,7 @@
   >
     <h1
       class="bg-clip-text text-transparent font-semibold text-6xl py-5 bg-gradient-to-tr from-fuchsia-500 via-blue-400 to-green-300 "
-      in:fly={{ y: 200, duration: 2000}}
+      in:fly={{ y: 20, duration: 2000}}
     >
       Organize
     </h1>
@@ -20,25 +20,3 @@
     <Button on:click={() => chooseHomeFolder().then(res => res && continueFunction())}>Choose a folder</Button>
   </div>
 </div>
-
-<style lang="postcss">
-  /* TODO remove when done */
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-
-  @keyframes title-in {
-    0% {
-      transform: translateY(50px);
-      opacity: 0;
-    }
-    25% {
-      transform: translateY(50px);
-      opacity: 0.1;
-    }
-    100% {
-      transform: translateY(0px);
-      opacity: 1;
-    }
-  }
-</style>
