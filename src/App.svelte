@@ -35,7 +35,7 @@
       <p on:click={() => {
         if ($titleBar.clickable) 
           appState.nextState(AppState.SELECT_FOLDERS);
-      }} class="hover:underline cursor-pointer">{$titleBar.secondHalf}</p>
+      }} class="transition-all hover:font-semibold cursor-pointer">{$titleBar.secondHalf}</p>
     </div>
   </div>
 

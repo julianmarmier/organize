@@ -25,7 +25,7 @@
 <div class="flex h-full place-content-center items-center">
   <div
     class="flex flex-col items-center bg-slate-50 px-16 py-10 rounded-2xl drop-shadow-md space-y-2 w-full mx-24"
-    in:fly={{ x: 200, duration: 500 }}
+    transition:fly={{ x: 200, duration: 500 }}
   >
     <div class="flex items-center">
       <Icon data={folder} />

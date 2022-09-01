@@ -1,40 +1,171 @@
 <script lang="ts">
-  import Keybinding from "../components/Keybinding.svelte";
-  import Icon from "svelte-awesome";
-  import { check, folder, trash } from "svelte-awesome/icons";
+  import { spring } from "svelte/motion";
+  import { slide } from "svelte/transition";
 
-    import { slide } from "svelte/transition"
+  import FileEntry from "../components/main-screen/FileEntry.svelte";
+
+  import FolderButton from "../components/main-screen/FolderButton.svelte";
+  import KeepButton from "../components/main-screen/KeepButton.svelte";
+  import TrashButton from "../components/main-screen/TrashButton.svelte";
+
+  import { writable, type Writable } from "svelte/store";
+  import FolderList from "../components/main-screen/FolderList.svelte";
+
+  import { Key } from "../util/Key";
+  import { areaOccupiedFraction, checkIntersection } from "../util/rect";
+  import { folder } from "svelte-awesome/icons";
+
+  let file: HTMLElement;
+  let folderShow: boolean = false;
+  let folderList: HTMLElement;
+  let folderVisible: Writable<boolean[]>;
+  let folderCurrentSelected: number;
+
+  interface Action {
+    div?: HTMLElement;
+    active?: Writable<boolean>;
+    interact: () => void;
+  }
+
+  const elements: {
+    trash: Action;
+    folders: Action;
+    keep: Action;
+  } = {
+    trash: {
+      active: writable(false),
+      interact: () => {},
+    },
+    folders: {
+      active: writable(false),
+      interact: () => {
+        folderShow = !folderShow;
+        elements.folders.active.set(folderShow);
+      },
+    },
+    keep: {
+      active: writable(false),
+      interact: () => {},
+    },
+  };
+
+  let dragging = false;
+  let coords = spring(
+    { x: 0, y: 0 },
+    {
+      stiffness: 0.1,
+      damping: 0.5,
+    }
+  );
+
+  const resetSpring = () => {
+    dragging = false;
+    coords.set(
+      { x: 0, y: 0 },
+      {
+        soft: 1,
+      }
+    );
+
+    // Check if interaction is needed
+    for (const element of Object.values(elements)) {
+      if (checkIntersection(element.div, file)) element.interact();
+    }
+  };
+
+  const handleKeyboard = (e: KeyboardEvent) => {
+    switch (e.code) {
+      case Key.ArrowLeft:
+        // toggle trash
+        break;
+      case Key.ArrowRight:
+        // toggle check
+        break;
+      case Key.ArrowDown:
+        // toggle trash
+        break;
+    }
+  };
+
+  const handleDrag = (e: MouseEvent) => {
+    if (!dragging) return;
+
+    coords.update((old) => ({
+      x: old.x - e.movementX,
+      y: old.y - e.movementY,
+    }));
+
+    // Check if file is within element bounds
+    for (const [key, element] of Object.entries(elements)) {
+      element.active.set(
+        checkIntersection(element.div, file) || (folderShow && key == "folders")
+      );
+    }
+
+    // Check if file is intersecting with a list element
+    if (folderShow) {
+      for (let i = 0; i < folderList.children.length; i++) {
+        // then tell FolderList to interact with item i.
+        const current = folderList.children[i];
+
+        folderVisible.update((bef) => {
+          bef[i] =
+            checkIntersection(current, file) &&
+            areaOccupiedFraction(file, current) >
+              areaOccupiedFraction(file, folderList.children[folderCurrentSelected]);
+          folderCurrentSelected = i;
+          return bef;
+        });
+      }
+    }
+  };
 </script>
 
+<svelte:window on:keydown={handleKeyboard} />
 <div
-  class="w-full h-full bg-white grid grid-cols-[min-content_1fr_min-content] grid-rows-[1fr_min-content]"
+  class="w-full h-full overflow-hidden relative"
+  class:cursor-grabbing={dragging}
   transition:slide
+  on:mouseup={resetSpring}
+  on:mouseleave={resetSpring}
+  on:mousemove={handleDrag}
 >
-  <div class="flex items-center">
-    <div class="bg-red-500 text-white pl-2 pr-4 py-8 rounded-r-full relative">
-      <Icon scale={2} data={trash} />
-      <Keybinding positioning="-bottom-3">←</Keybinding>
+  <div
+    class="w-full h-full bg-white grid grid-cols-[min-content_1fr_min-content] grid-rows-[1fr_min-content] select-none"
+  >
+    <div class="flex items-center">
+      <TrashButton
+        bind:div={elements.trash.div}
+        bind:active={elements.trash.active}
+        bind:folderShow
+        on:click={elements.trash.interact}
+      />
     </div>
-  </div>
-  <div class="flex place-items-center place-content-center">
-    <div class="shadow-md bg-slate-50 shadow-slate-300 rounded-lg px-10 py-4">
-      File
+
+    <div class="flex place-items-center place-content-center relative">
+      <FileEntry bind:div={file} bind:coords bind:dragging />
     </div>
-  </div>
-  <div class="flex place-items-center place-content-end">
-    <div class="bg-green-600 text-white pl-3 pr-1 py-8 rounded-l-full relative">
-      <Icon scale={2} data={check} />
-      <Keybinding positioning="-bottom-3 right-2">→</Keybinding>
+
+    <div class="flex place-items-center place-content-end">
+      <KeepButton
+        bind:div={elements.keep.div}
+        bind:active={elements.keep.active}
+        bind:folderShow
+        on:click={elements.keep.interact}
+      />
     </div>
-  </div>
-  <div />
-  <div class="flex place-items-end place-content-center relative">
-    <div class="bg-slate-300 rounded-t-full px-10 pt-4 pb-2">
-      <Icon scale={2} data={folder} />
+    <div />
+    <div class="flex place-items-end place-content-center relative">
+      <FolderButton
+        bind:div={elements.folders.div}
+        bind:active={elements.folders.active}
+        bind:folderShow
+        on:click={elements.folders.interact}
+      />
     </div>
-    <Keybinding positioning="-top-3">↓</Keybinding>
+    <div />
   </div>
-  <div />
+  <FolderList bind:folderShow bind:div={folderList} bind:folderVisible />
 </div>
 
 <style lang="postcss">

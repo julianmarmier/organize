@@ -18,7 +18,7 @@
 
 </script>
 
-<div on:click="{handleBehavior}" class="rounded-full w-5 h-5 flex items-center justify-center bg-slate-200 border border-slate-300 border-solid mr-1 hover:bg-{color}-300 hover:cursor-pointer">
+<div on:mousemove|preventDefault on:click="{handleBehavior}" class="select-none rounded-full w-5 h-5 flex items-center justify-center bg-slate-200 border border-slate-300 border-solid mr-1 hover:bg-{color}-300 hover:cursor-pointer">
     {character}
 </div>
 
