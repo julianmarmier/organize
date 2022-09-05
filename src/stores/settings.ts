@@ -4,6 +4,7 @@ import { Settings } from "./definitions";
 import type { SettingsState } from "./definitions";
 
 import { writable } from "svelte/store";
+import { homeDir } from "@tauri-apps/api/path";
 
 const store = new Store("settings.dat");
 
@@ -104,6 +105,7 @@ const chooseFolder = async (
 ) => {
   const chosenPath = await dialog.open({
     directory: true,
+    defaultPath: (await getHomeFolder()) ?? (await homeDir()),
     multiple: multiple ?? false,
   });
 

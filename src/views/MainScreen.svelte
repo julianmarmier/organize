@@ -13,7 +13,13 @@
 
   import { Key } from "../util/Key";
   import { areaOccupiedFraction, checkIntersection } from "../util/rect";
-  import { folder } from "svelte-awesome/icons";
+  import { onMount } from "svelte";
+import { settingState } from "../stores/settings";
+import { resolveToHome } from "../util/path";
+
+  onMount(() => {
+    resolveToHome($settingState.homeFolder)
+  })
 
   let file: HTMLElement;
   let folderShow: boolean = false;
@@ -71,6 +77,15 @@
     for (const element of Object.values(elements)) {
       if (checkIntersection(element.div, file)) element.interact();
     }
+    
+    if (folderCurrentSelected || folderCurrentSelected == 0 && folderShow) {
+      const currentFolder = folderList.children[folderCurrentSelected];
+
+      if (checkIntersection(currentFolder, file)) {
+        // interact with index folderCurrentSelected
+
+      }
+    }
   };
 
   const handleKeyboard = (e: KeyboardEvent) => {
@@ -109,11 +124,15 @@
         const current = folderList.children[i];
 
         folderVisible.update((bef) => {
-          bef[i] =
+          const intersecting =
             checkIntersection(current, file) &&
-            areaOccupiedFraction(file, current) >
-              areaOccupiedFraction(file, folderList.children[folderCurrentSelected]);
-          folderCurrentSelected = i;
+            areaOccupiedFraction(file, current) >=
+              areaOccupiedFraction(
+                file,
+                folderList.children[folderCurrentSelected ?? i]
+              );
+          bef[i] = intersecting;
+          if (intersecting) folderCurrentSelected = i;
           return bef;
         });
       }
