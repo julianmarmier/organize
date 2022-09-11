@@ -1,4 +1,6 @@
 <script lang="ts">
+  import "file-icon-vectors/dist/file-icon-square-o.min.css";
+  
   import ControlButton from "./components/ControlButton.svelte";
 
   import Intro from "./views/Intro.svelte";

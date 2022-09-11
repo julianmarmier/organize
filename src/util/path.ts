@@ -56,8 +56,6 @@ export const checkValidPath = async (path: string) =>
  * Implementation may change if this does not suffice.
  */
 export const resolveToHome = async (path?: string) => {
-  console.log(await homeDir());
-  
   if (!(await checkValidPath(path))) throw new Error("Path is not valid !");
   return path.substring((await homeDir()).length);
 };

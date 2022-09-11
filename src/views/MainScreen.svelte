@@ -13,13 +13,11 @@
 
   import { Key } from "../util/Key";
   import { areaOccupiedFraction, checkIntersection } from "../util/rect";
-  import { onMount } from "svelte";
-import { settingState } from "../stores/settings";
-import { resolveToHome } from "../util/path";
 
-  onMount(() => {
-    resolveToHome($settingState.homeFolder)
-  })
+  import { fileList, currentFile } from "../stores/files";
+
+  import { moveFileToFolder, removeFile } from "../util/file";
+  import { settingState } from "../stores/settings";
 
   let file: HTMLElement;
   let folderShow: boolean = false;
@@ -30,8 +28,21 @@ import { resolveToHome } from "../util/path";
   interface Action {
     div?: HTMLElement;
     active?: Writable<boolean>;
-    interact: () => void;
+    interact: (animate?: boolean) => void;
   }
+
+  const ANIMATION_INTERVAL = 400;
+
+  const handleAnimation = (active: Writable<boolean>, animate?: boolean) => {
+    if (animate) {
+      active.set(true);
+      setTimeout(() => {
+        active.set(false);
+      }, ANIMATION_INTERVAL);
+    } else {
+      active.set(false);
+    }
+  };
 
   const elements: {
     trash: Action;
@@ -40,18 +51,26 @@ import { resolveToHome } from "../util/path";
   } = {
     trash: {
       active: writable(false),
-      interact: () => {},
+      interact: (animate?) => {
+        removeFile($currentFile.path).then(() => {
+          fileList.next();
+          handleAnimation(elements.trash.active, animate);
+        });
+      },
     },
     folders: {
       active: writable(false),
-      interact: () => {
+      interact: (animate?) => {
         folderShow = !folderShow;
         elements.folders.active.set(folderShow);
       },
     },
     keep: {
       active: writable(false),
-      interact: () => {},
+      interact: (animate?) => {
+        fileList.next();
+        handleAnimation(elements.keep.active, animate);
+      },
     },
   };
 
@@ -77,13 +96,13 @@ import { resolveToHome } from "../util/path";
     for (const element of Object.values(elements)) {
       if (checkIntersection(element.div, file)) element.interact();
     }
-    
-    if (folderCurrentSelected || folderCurrentSelected == 0 && folderShow) {
-      const currentFolder = folderList.children[folderCurrentSelected];
 
-      if (checkIntersection(currentFolder, file)) {
+    if (folderCurrentSelected || (folderCurrentSelected == 0 && folderShow)) {
+      const currentFolderElement = folderList.children[folderCurrentSelected];
+
+      if (checkIntersection(currentFolderElement, file)) {
         // interact with index folderCurrentSelected
-
+        interactWithFolder(folderCurrentSelected);
       }
     }
   };
@@ -124,19 +143,36 @@ import { resolveToHome } from "../util/path";
         const current = folderList.children[i];
 
         folderVisible.update((bef) => {
-          const intersecting =
-            checkIntersection(current, file) &&
-            areaOccupiedFraction(file, current) >=
-              areaOccupiedFraction(
-                file,
-                folderList.children[folderCurrentSelected ?? i]
-              );
+          let coversMost;
+
+          if (folderCurrentSelected || folderCurrentSelected == 0) {
+            coversMost =
+              folderCurrentSelected == i
+                ? true
+                : areaOccupiedFraction(file, current) >
+                  areaOccupiedFraction(
+                    file,
+                    folderList.children[folderCurrentSelected]
+                  );
+          } else {
+            coversMost = true;
+          }
+
+          const intersecting = coversMost && checkIntersection(current, file);
           bef[i] = intersecting;
           if (intersecting) folderCurrentSelected = i;
           return bef;
         });
       }
     }
+  };
+
+  const interactWithFolder = (i: number) => {
+    const folderPath = $settingState.otherFolders[i];
+    moveFileToFolder($currentFile.path, folderPath);
+    folderShow = false;
+    fileList.next()
+    elements.folders.active.set(false)
   };
 </script>
 
@@ -157,20 +193,34 @@ import { resolveToHome } from "../util/path";
         bind:div={elements.trash.div}
         bind:active={elements.trash.active}
         bind:folderShow
-        on:click={elements.trash.interact}
+        on:click={() => elements.trash.interact(true)}
       />
     </div>
 
-    <div class="flex place-items-center place-content-center relative">
-      <FileEntry bind:div={file} bind:coords bind:dragging />
-    </div>
+    {#await fileList.init() then _}
+      <div class="flex place-items-center place-content-center relative">
+        {#if $currentFile}
+          <FileEntry
+            bind:div={file}
+            bind:coords
+            bind:dragging
+            bind:ext={$currentFile.ext}
+
+            path={$currentFile.path}
+          >
+            <p slot="name">{$currentFile.name}</p>
+            <p slot="size">{$currentFile.formattedSize}</p>
+          </FileEntry>
+        {/if}
+      </div>
+    {/await}
 
     <div class="flex place-items-center place-content-end">
       <KeepButton
         bind:div={elements.keep.div}
         bind:active={elements.keep.active}
         bind:folderShow
-        on:click={elements.keep.interact}
+        on:click={() => elements.keep.interact(true)}
       />
     </div>
     <div />
@@ -179,12 +229,12 @@ import { resolveToHome } from "../util/path";
         bind:div={elements.folders.div}
         bind:active={elements.folders.active}
         bind:folderShow
-        on:click={elements.folders.interact}
+        on:click={() => elements.folders.interact()}
       />
     </div>
     <div />
   </div>
-  <FolderList bind:folderShow bind:div={folderList} bind:folderVisible />
+  <FolderList bind:folderShow bind:div={folderList} bind:folderVisible interact={interactWithFolder}/>
 </div>
 
 <style lang="postcss">

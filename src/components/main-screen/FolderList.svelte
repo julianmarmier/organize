@@ -10,6 +10,7 @@
   export let folderShow: boolean;
   export let div: HTMLElement;
   export let folderVisible: Writable<boolean[]> = writable<boolean[]>([]);
+  export let interact: (i: number) => void;
 
   onMount(() => {
     folderVisible.set(new Array<boolean>($settingState.otherFolders.length));
@@ -28,6 +29,7 @@
         class="cursor-pointer flex flex-col place-items-center \
                place-content-center hover:bg-slate-100 rounded-lg py-3"
         class:bg-slate-100={$folderVisible[i]}
+        on:click="{() => interact(i)}"
       >
         <div
           class="rounded-full h-14 w-14 bg-slate-300 flex place-content-center \
