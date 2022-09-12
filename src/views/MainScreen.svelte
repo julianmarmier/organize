@@ -18,6 +18,8 @@
 
   import { moveFileToFolder, removeFile } from "../util/file";
   import { settingState } from "../stores/settings";
+  import coordinate, { type Coordinates } from "../util/coordinates";
+  import { init } from "svelte/internal";
 
   let file: HTMLElement;
   let folderShow: boolean = false;
@@ -75,7 +77,7 @@
   };
 
   let dragging = false;
-  let coords = spring(
+  let coords = spring<Coordinates>(
     { x: 0, y: 0 },
     {
       stiffness: 0.1,
@@ -121,13 +123,24 @@
     }
   };
 
+  let initialClick: Coordinates;
+
+  const handleWindowClick = (e: MouseEvent) => {
+    initialClick = {
+      x: e.screenX,
+      y: e.screenY
+    }
+  };
+
   const handleDrag = (e: MouseEvent) => {
     if (!dragging) return;
+    
+    const clickLocation = {
+      x: e.screenX,
+      y: e.screenY,
+    };
 
-    coords.update((old) => ({
-      x: old.x - e.movementX,
-      y: old.y - e.movementY,
-    }));
+    coords.set(coordinate.difference(clickLocation, initialClick));
 
     // Check if file is within element bounds
     for (const [key, element] of Object.entries(elements)) {
@@ -171,8 +184,8 @@
     const folderPath = $settingState.otherFolders[i];
     moveFileToFolder($currentFile.path, folderPath);
     folderShow = false;
-    fileList.next()
-    elements.folders.active.set(false)
+    fileList.next();
+    elements.folders.active.set(false);
   };
 </script>
 
@@ -183,6 +196,7 @@
   transition:slide
   on:mouseup={resetSpring}
   on:mouseleave={resetSpring}
+  on:mousedown={handleWindowClick}
   on:mousemove={handleDrag}
 >
   <div
@@ -205,7 +219,6 @@
             bind:coords
             bind:dragging
             bind:ext={$currentFile.ext}
-
             path={$currentFile.path}
           >
             <p slot="name">{$currentFile.name}</p>
@@ -234,7 +247,12 @@
     </div>
     <div />
   </div>
-  <FolderList bind:folderShow bind:div={folderList} bind:folderVisible interact={interactWithFolder}/>
+  <FolderList
+    bind:folderShow
+    bind:div={folderList}
+    bind:folderVisible
+    interact={interactWithFolder}
+  />
 </div>
 
 <style lang="postcss">
