@@ -2,6 +2,7 @@
  * File system operations for keeping, deleting and moving files
  */
 
+import { invoke } from "@tauri-apps/api";
 import * as fs from "@tauri-apps/api/fs";
 import { extname, sep } from "@tauri-apps/api/path";
 import { metadata } from "tauri-plugin-fs-extra-api";
@@ -33,11 +34,28 @@ export const moveFileToFolder = async (path: string, newFolderPath: string) => {
 
 export const getFileInfo = async (path: string): Promise<FileInfo> => {
   const metad = await metadata(path);
+  let ext;
+
+  try {
+    ext = await extname(path);
+  } catch (err) {
+    ext = "SYSTEM"
+  }
+
+
   return {
     formattedSize: formatBytes(metad.size),
     dateAccessed: metad.accessedAt,
-    ext: await extname(path),
+    ext: ext
   };
+};
+
+export const openPath = async (path: string) => {
+  const res = await invoke("open_path", {
+    path: path,
+  });
+  
+  if(!res) alert("Unable to open file.")
 };
 
 export interface FileInfo {

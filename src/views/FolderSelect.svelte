@@ -24,7 +24,7 @@
 
 <div class="flex h-full place-content-center items-center">
   <div
-    class="flex flex-col items-center bg-slate-50 px-16 py-10 rounded-2xl drop-shadow-md space-y-2 w-full mx-24"
+    class="flex flex-col items-center bg-slate-50 px-16 py-10 rounded-2xl drop-shadow-md space-y-2 w-full mx-24 max-h-almost-full"
     transition:fly={{ x: 200, duration: 500 }}
   >
     <div class="flex items-center">
@@ -40,7 +40,7 @@
       </h1>
     </div>
     <p class="pb-3">Choose folders to quickly move your files.</p>
-    <ul class="w-full">
+    <ul class="w-full overflow-y-scroll">
       {#each $settingState.otherFolders as folder, i (folder)}
         <FolderEntry on:click={() => removeOtherFolder(folder)}>
           <span slot="icon">{i + 1}</span>
@@ -52,10 +52,12 @@
         </FolderEntry>
       {/each}
 
+      {#if $settingState.otherFolders.length < 9}
       <FolderEntry isSpecial={true} on:click={chooseOtherFolder}>
         <span slot="icon">+</span>
         <p slot="folder">Add a folder…</p>
       </FolderEntry>
+      {/if}
     </ul>
 
     <Button on:click={() => state.nextState()}>Continue</Button>

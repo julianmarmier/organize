@@ -15,20 +15,13 @@
           fixed cursor-pointer origin-center \
           ${
             $active
-              ? "flex place-items-center place-content-center px-3 bottom-5 rounded-full h-16 w-16"
+              ? "flex place-items-center place-content-center px-0 bottom-5 rounded-full h-16 w-16"
               : "rounded-t-full pt-4 pb-2 bottom-0"
           }
-            ${folderShow ? "bottom-2/3" : ""}
+            ${folderShow ? "bottom-3/4" : ""}
           `}
   bind:this={div}
 >
   <Icon scale={2} data={folderShow ? close : folder} />
   <Keybinding positioning="-top-3">{folderShow ? "↑" : "↓"}</Keybinding>
 </div>
-
-<style lang="postcss">
-  /* TODO remove when done */
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-</style>

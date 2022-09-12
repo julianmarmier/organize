@@ -10,7 +10,6 @@
 </script>
 
 <div
-  on:drop={() => console.log("Dropped!")}
   bind:this={div}
   on:click
   class={`bg-green-600 text-white absolute \

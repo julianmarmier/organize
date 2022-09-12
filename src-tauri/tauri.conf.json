@@ -15,6 +15,9 @@
       "all": true,
       "fs": {
         "scope": ["$HOME/**"]
+      },
+      "window": {
+        "setFullscreen": true
       }
     },
     "bundle": {
@@ -63,6 +66,7 @@
         "resizable": true,
         "title": "Organize",
         "width": 800,
+        
         "decorations": false
       }
     ]

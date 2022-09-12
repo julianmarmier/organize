@@ -6,6 +6,9 @@ module.exports = {
     extend: {
       borderRadius: {
         'circ': '100%'
+      },
+      maxHeight: {
+        'almost-full': 'calc(100vh - 5rem)'
       }
     },
   },

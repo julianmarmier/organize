@@ -5,7 +5,9 @@ import type { SettingsState } from "./definitions";
 
 import { writable } from "svelte/store";
 import { homeDir } from "@tauri-apps/api/path";
+import { checkValidPath } from "../util/path";
 
+const MAX_FOLDER_NO = 9;
 const store = new Store("settings.dat");
 
 const {
@@ -111,6 +113,14 @@ const chooseFolder = async (
 
   if (chosenPath) {
     const normalized = Array.isArray(chosenPath) ? chosenPath : [chosenPath];
+
+    for (const path of normalized) {
+      if (!(await checkValidPath(path))) {
+        alert("Please select a subfolder of " + (await homeDir()));
+        return;
+      }
+    }
+
     await callback(...normalized);
     return true;
   }
@@ -137,7 +147,8 @@ const chooseOtherFolder = async () =>
     const folderList = (await getOtherFolders()) ?? [];
 
     for (const path of paths) {
-      if (!folderList.includes(path)) folderList.push(path);
+      if (!folderList.includes(path) && folderList.length < MAX_FOLDER_NO)
+        folderList.push(path);
     }
 
     return setOtherFolders(folderList);

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { spring } from "svelte/motion";
-  import { slide } from "svelte/transition";
+  import { fly } from "svelte/transition";
 
   import FileEntry from "../components/main-screen/FileEntry.svelte";
 
+  import Button from "../components/Button.svelte";
   import FolderButton from "../components/main-screen/FolderButton.svelte";
   import KeepButton from "../components/main-screen/KeepButton.svelte";
   import TrashButton from "../components/main-screen/TrashButton.svelte";
@@ -14,12 +15,14 @@
   import { Key } from "../util/Key";
   import { areaOccupiedFraction, checkIntersection } from "../util/rect";
 
-  import { fileList, currentFile } from "../stores/files";
+  import { currentFile, fileList } from "../stores/files";
 
-  import { moveFileToFolder, removeFile } from "../util/file";
+  import { state } from "../stores/appState";
+  import { AppState } from "../stores/definitions";
   import { settingState } from "../stores/settings";
+  import { titleBar } from "../stores/titleBar";
   import coordinate, { type Coordinates } from "../util/coordinates";
-  import { init } from "svelte/internal";
+  import { moveFileToFolder, openPath, removeFile } from "../util/file";
 
   let file: HTMLElement;
   let folderShow: boolean = false;
@@ -62,7 +65,7 @@
     },
     folders: {
       active: writable(false),
-      interact: (animate?) => {
+      interact: () => {
         folderShow = !folderShow;
         elements.folders.active.set(folderShow);
       },
@@ -113,13 +116,36 @@
     switch (e.code) {
       case Key.ArrowLeft:
         // toggle trash
+        e.preventDefault();
+        elements.trash.interact(true);
         break;
       case Key.ArrowRight:
         // toggle check
+        elements.keep.interact(true);
+        e.preventDefault();
         break;
       case Key.ArrowDown:
-        // toggle trash
+        // toggle folders
+        elements.folders.interact(true);
+        e.preventDefault();
         break;
+    }
+
+    switch (e.key) {
+      case "o":
+        openPath($currentFile.path);
+        e.preventDefault();
+        break;
+    }
+
+    // Check if a folder key was pressed
+    if (
+      folderShow &&
+      "1" <= e.key &&
+      e.key <= $settingState.otherFolders.length.toString()
+    ) {
+      interactWithFolder(Number(e.key) - 1);
+      e.preventDefault();
     }
   };
 
@@ -128,13 +154,13 @@
   const handleWindowClick = (e: MouseEvent) => {
     initialClick = {
       x: e.screenX,
-      y: e.screenY
-    }
+      y: e.screenY,
+    };
   };
 
   const handleDrag = (e: MouseEvent) => {
     if (!dragging) return;
-    
+
     const clickLocation = {
       x: e.screenX,
       y: e.screenY,
@@ -193,7 +219,7 @@
 <div
   class="w-full h-full overflow-hidden relative"
   class:cursor-grabbing={dragging}
-  transition:slide
+  transition:fly={{ y: 50 }}
   on:mouseup={resetSpring}
   on:mouseleave={resetSpring}
   on:mousedown={handleWindowClick}
@@ -224,6 +250,22 @@
             <p slot="name">{$currentFile.name}</p>
             <p slot="size">{$currentFile.formattedSize}</p>
           </FileEntry>
+        {/if}
+        {#if !$currentFile}
+          <div
+            class="flex flex-col w-3/4 p-5 bg-slate-100 place-items-center justify-items-center space-y-4 rounded-xl shadow-lg"
+          >
+            <h1 class="font-semibold text-xl">That's it!</h1>
+            <p>
+              You finished sorting all of the files in <b>{$titleBar.secondHalf}</b>.
+            </p>
+            <p>
+              <Button on:click={() => state.nextState(AppState.SELECT_FOLDERS)}
+                >Choose another folder</Button
+              >
+              <Button on:click={fileList.init}>Start again</Button>
+            </p>
+          </div>
         {/if}
       </div>
     {/await}

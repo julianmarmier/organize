@@ -43,6 +43,8 @@ export const currentFile = derived<typeof fileList, OrganizeFile>(
           ...res,
         })
       );
+    } else {
+      set(null)
     }
   }
 );
