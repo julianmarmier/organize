@@ -134,7 +134,6 @@ const chooseFolder = async (
  */
 const chooseHomeFolder = async () =>
   chooseFolder((...paths: string[]) => {
-    // TODO check if there is a better way to handle the string - array conversion
     return setHomeFolder(paths[0]);
   }, false);
 

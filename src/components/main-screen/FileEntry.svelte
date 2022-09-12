@@ -43,10 +43,3 @@
     >
   </div>
 </div>
-
-<style lang="postcss">
-  /* TODO remove when done */
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-</style>
