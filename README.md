@@ -2,4 +2,4 @@
 
 Organize your files, efficiently. Build on [Tauri](https://tauri.app) and [Svelte](https://svelte.dev).
 
-See the [releases](https://github.com/julianmarmier/organize/releases) to try it!
+Go to the [releases](https://github.com/julianmarmier/organize/releases) page to try it!
