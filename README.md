@@ -1,6 +1,6 @@
 # Organize
 
-Organize your files, efficiently. Build on [Tauri](https://tauri.app) and [Svelte](https://svelte.dev).
+Organize your files, efficiently. Built on [Tauri](https://tauri.app) and [Svelte](https://svelte.dev).
 
 ## Installation
 
