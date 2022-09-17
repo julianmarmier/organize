@@ -24,4 +24,4 @@ pnpm run tauri build
 
 ### Linux
 
-Unfortunately, Tauri only exports `AppImage` and `deb` packages. You can use an `AppImage` pretty much anywhere, and I've provided a deptapped `.tar.zst` for Arch. If none of those work, you can build from source as described in the [Windows](#Windows) section.
+Unfortunately, Tauri only exports `AppImage` and `deb` packages. You can use an `AppImage` pretty much anywhere, and I've provided a deptapped `pkg.tar.zst` for Arch. If none of those work, you can build from source as described in the [Windows](#Windows) section.
