@@ -1,48 +1,27 @@
-# Svelte + TS + Vite
+# Organize
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+Organize your files, efficiently. Built on [Tauri](https://tauri.app) and [Svelte](https://svelte.dev).
 
-## Recommended IDE Setup
+## Installation
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+All binaries can be found on the [releases](https://github.com/julianmarmier/organize/releases) page.
 
-## Need an official Svelte framework?
+### macOS
+Download the `dmg` for your [appropriate architecture](https://support.apple.com/en-us/HT211814) (aarch64 for Apple Silicon, amd64 for Intel) and install the app as you would any other. If you cannot open it because of security settings, go to **System Preferences > Security > Open Anyway**.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+### Windows
 
-## Technical considerations
+I do not have access to a Windows machine and therefore you will need to build from source. To do that, install [Git for Windows](https://gitforwindows.org/), [Node.js LTS](https://nodejs.org/en/download/), and [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-windows).
 
-**Why use this over SvelteKit?**
+I also recommend using `pnpm` as your node package manager. Installation instructions [here](https://pnpm.io/installation).
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-  `vite dev` and `vite build` wouldn't work in a SvelteKit environment, for example.
+Now that that's all set, you can finally clone the repo and build the project !
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
-
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+git clone https://github.com/julianmarmier/organize
+pnpm run tauri build
 ```
+
+### Linux
+
+Unfortunately, Tauri only exports `AppImage` and `deb` packages. You can use an `AppImage` pretty much anywhere, and I've provided a deptapped `pkg.tar.zst` for Arch. If none of those work, you can build from source as described in the [Windows](#Windows) section.
